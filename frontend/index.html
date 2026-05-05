@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinAnalyst — Financial NLP Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f2f1ee;
+    --border: #e4e2dc;
+    --border2: #ccc9c0;
+    --text: #1a1916;
+    --text2: #6b6860;
+    --text3: #9c9a94;
+    --accent: #1a472a;
+    --accent-light: #e8f0ea;
+    --accent-text: #1a472a;
+    --red: #8b1a1a;
+    --red-bg: #fdf0f0;
+    --amber: #7a4f00;
+    --amber-bg: #fdf6e3;
+    --green: #1a472a;
+    --green-bg: #edf5ee;
+    --blue: #0d3561;
+    --blue-bg: #eef4fb;
+    --purple: #3d1a6e;
+    --purple-bg: #f3eefb;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .app-shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .sidebar-nav { padding: 12px 10px; flex: 1; }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 10px;
+    margin: 16px 0 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 400;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  .main { margin-left: 240px; flex: 1; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .page-title { font-size: 16px; font-weight: 500; }
+  .page-sub { font-size: 13px; color: var(--text3); margin-top: 1px; }
+
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text2);
+    background: var(--surface2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #ccc;
+  }
+  .status-dot.online { background: #3a9e5f; }
+  .status-dot.offline { background: #d44; }
+
+  .content { padding: 28px; }
+
+  /* ── Panels ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* ── Form elements ── */
+  textarea, input[type=text] {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    transition: border 0.15s;
+    outline: none;
+    line-height: 1.6;
+  }
+  textarea { min-height: 160px; resize: vertical; }
+  textarea:focus, input[type=text]:focus { border-color: var(--accent); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #15391f; border-color: #15391f; }
+
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* ── Metrics ── */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .metric {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .metric-value { font-size: 24px; font-weight: 500; line-height: 1.1; }
+  .metric-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+  /* ── Tags / chips ── */
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .tag-red { background: var(--red-bg); color: var(--red); border-color: #f0c0c0; }
+  .tag-amber { background: var(--amber-bg); color: var(--amber); border-color: #e8c97a; }
+  .tag-green { background: var(--green-bg); color: var(--green); border-color: #9fcca8; }
+  .tag-blue { background: var(--blue-bg); color: var(--blue); border-color: #90b8e0; }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); border-color: #b89ee0; }
+  .tag-gray { background: var(--surface2); color: var(--text2); border-color: var(--border); }
+
+  .tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── Progress bars ── */
+  .bar-row { margin-bottom: 10px; }
+  .bar-meta { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .bar-label { color: var(--text2); }
+  .bar-pct { font-weight: 500; color: var(--text); }
+  .bar-track { height: 5px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Chat ── */
+  .chat-wrapper {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .chat-messages {
+    min-height: 280px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msg { display: flex; flex-direction: column; gap: 3px; }
+  .msg-from { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .msg.user .msg-from { color: var(--blue); }
+  .msg.assistant .msg-from { color: var(--accent); }
+  .msg-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--surface2);
+    padding: 10px 13px;
+    border-radius: var(--radius-sm);
+    max-width: 88%;
+  }
+  .msg.user .msg-body { background: var(--blue-bg); align-self: flex-end; }
+  .msg.assistant .msg-body { align-self: flex-start; }
+  .chat-input-area {
+    border-top: 1px solid var(--border);
+    padding: 12px 14px;
+    display: flex;
+    gap: 8px;
+    background: var(--surface2);
+  }
+  .chat-input-area input { flex: 1; }
+
+  /* ── Sentence list ── */
+  .sentence-item {
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid;
+    background: var(--surface2);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 7px;
+  }
+  .sentence-item.positive { border-color: #3a9e5f; }
+  .sentence-item.negative { border-color: #d44; }
+  .sentence-item.neutral { border-color: var(--border2); }
+
+  /* ── Suggested Qs ── */
+  .sq-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .sq-btn {
+    font-size: 12px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .sq-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ── Loading ── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-overlay {
+    display: none;
+    text-align: center;
+    padding: 32px;
+    color: var(--text2);
+    font-size: 14px;
+  }
+  .loading-overlay.show { display: block; }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+    font-size: 14px;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  /* ── Summary box ── */
+  .summary-box {
+    background: var(--accent-light);
+    border: 1px solid #c0d8c4;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--accent-text);
+    margin-bottom: 16px;
+  }
+
+  /* ── Keyword table ── */
+  .kw-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .kw-item:last-child { border-bottom: none; }
+  .kw-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0.7;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 650px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── Mono ── */
+  .mono { font-family: 'DM Mono', monospace; }
+
+  /* ── Alert ── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .alert-info { background: var(--blue-bg); color: var(--blue); border: 1px solid #90b8e0; }
+  .alert-warn { background: var(--amber-bg); color: var(--amber); border: 1px solid #e8c97a; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">FinAnalyst</div>
+      <div class="logo-sub">NLP Platform · v1.0</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Analysis</div>
+      <button class="nav-item active" onclick="showPanel('home')" id="nav-home">
+        <span class="nav-icon">⬡</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showPanel('analyze')" id="nav-analyze">
+        <span class="nav-icon">◈</span> Document Analyzer
+      </button>
+      <button class="nav-item" onclick="showPanel('qa')" id="nav-qa">
+        <span class="nav-icon">◉</span> Q&amp;A Chat
+      </button>
+      <button class="nav-item" onclick="showPanel('compare')" id="nav-compare">
+        <span class="nav-icon">⊞</span> Compare Documents
+      </button>
+      <div class="nav-section-label">Reference</div>
+      <button class="nav-item" onclick="showPanel('about')" id="nav-about">
+        <span class="nav-icon">◎</span> About &amp; NLP Methods
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      Built with FastAPI + TextBlob + TF-IDF<br/>
+      100% free &amp; open-source stack
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="pageSub">Welcome to FinAnalyst NLP Platform</div>
+      </div>
+      <div class="api-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Checking API...</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="panel active" id="panel-home">
+        <div class="alert alert-info" style="margin-bottom:20px">
+          Make sure the backend is running: <span class="mono">cd backend && python main.py</span> — then refresh this page.
+        </div>
+
+        <div class="grid-3" style="margin-bottom:20px">
+          <div class="card" style="cursor:pointer" onclick="showPanel('analyze')">
+            <div style="font-size:28px;margin-bottom:10px">◈</div>
+            <div style="font-weight:500;margin-bottom:4px">Document Analyzer</div>
+            <div style="font-size:13px;color:var(--text2)">Paste any financial report. Get sentiment, risk signals, keywords, entities, summary — instantly.</div>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="showPanel('qa')">
+            <div style="font-size:28px;margin-bottom:10px">◉</div>
+            <div style="font-weight:500;margin-bottom:4px">Q&amp;A Chat</div>
+            <div style="font-size:13px;color:var(--text2)">Ask plain-English questions about any financial document. Extractive NLP finds the answer.</div>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="showPanel('compare')">
+            <div style="font-size:28px;margin-bottom:10px">⊞</div>
+            <div style="font-weight:500;margin-bottom:4px">Compare Documents</div>
+            <div style="font-size:13px;color:var(--text2)">Side-by-side NLP comparison of two financial documents — sentiment, tone, risk profile.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">NLP techniques used in this project</div>
+          <div class="grid-2">
+            <div>
+              <div class="kw-item"><span>TF-IDF Keyword Extraction</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Sentiment Analysis (TextBlob)</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Extractive Summarization</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Named Entity Recognition</span><span class="tag tag-green">Active</span></div>
+            </div>
+            <div>
+              <div class="kw-item"><span>Subjectivity Detection</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Risk Signal Classification</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Document Classification</span><span class="tag tag-green">Active</span></div>
+              <div class="kw-item"><span>Extractive Q&amp;A (TF-IDF)</span><span class="tag tag-green">Active</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYZER ── -->
+      <div class="panel" id="panel-analyze">
+        <div class="grid-2" style="gap:20px;align-items:start">
+
+          <!-- Input -->
+          <div>
+            <div class="card">
+              <div class="card-title">Input Document</div>
+              <textarea id="docInput" placeholder="Paste any financial document here — earnings report, press release, 10-K excerpt, risk disclosure, forward guidance..."></textarea>
+              <div class="btn-row">
+                <button class="btn btn-primary" onclick="runAnalysis()">
+                  <span>Analyze</span>
+                </button>
+                <button class="btn btn-sm" onclick="loadSample('earnings')">Earnings sample</button>
+                <button class="btn btn-sm" onclick="loadSample('risk')">Risk sample</button>
+                <button class="btn btn-sm" onclick="loadSample('guidance')">Guidance sample</button>
+                <button class="btn btn-sm" onclick="clearAll()">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick stats placeholder -->
+          <div id="quickStatsArea">
+            <div class="card">
+              <div class="empty">
+                <div class="empty-icon">◈</div>
+                Paste a document and click Analyze to see NLP results here
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="analyzeLoading">
+          <span class="spinner"></span> Running NLP pipeline...
+        </div>
+
+        <!-- Results -->
+        <div id="resultsArea" style="display:none">
+
+          <div class="metric-grid" id="metricsRow"></div>
+
+          <div class="grid-2" style="gap:16px;margin-bottom:16px">
+            <div class="card">
+              <div class="card-title">Executive Summary</div>
+              <div class="summary-box" id="summaryBox"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Linguistic Signals</div>
+              <div id="signalBars"></div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="gap:16px;margin-bottom:16px">
+            <div class="card">
+              <div class="card-title">Top Keywords (TF-IDF)</div>
+              <div id="keywordsArea"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Named Entities</div>
+              <div id="entitiesArea"></div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="gap:16px;margin-bottom:16px">
+            <div class="card">
+              <div class="card-title">Risk Signals</div>
+              <div id="riskArea"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Sentence-level Sentiment</div>
+              <div id="sentencesArea"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Q&A ── -->
+      <div class="panel" id="panel-qa">
+        <div style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-title">Load Document for Q&amp;A</div>
+            <textarea id="qaDocInput" placeholder="Paste the financial document you want to question..." style="min-height:120px"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" onclick="confirmQaDoc()">Load Document</button>
+              <button class="btn btn-sm" onclick="loadQaSample('earnings')">Earnings sample</button>
+              <button class="btn btn-sm" onclick="loadQaSample('risk')">Risk sample</button>
+            </div>
+            <p id="qaDocStatus" style="font-size:12px;color:var(--text3);margin-top:8px"></p>
+          </div>
+        </div>
+
+        <div class="chat-wrapper">
+          <div class="chat-messages" id="chatMessages">
+            <div class="empty" style="padding:30px">
+              <div class="empty-icon">◉</div>
+              Load a document above, then ask questions below
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-top:1px solid var(--border);background:var(--surface2)">
+            <div class="sq-grid" id="suggestedQs"></div>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" id="qaInput" placeholder="Ask a question about the document..." onkeydown="if(event.key==='Enter')sendQuestion()"/>
+            <button class="btn btn-primary btn-sm" id="qaBtn" onclick="sendQuestion()">Ask</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COMPARE ── -->
+      <div class="panel" id="panel-compare">
+        <div class="grid-2" style="gap:16px;margin-bottom:16px">
+          <div class="card">
+            <div class="card-title">Document A</div>
+            <textarea id="cmpA" placeholder="Paste first financial document..." style="min-height:140px"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-sm" onclick="loadCmpSample('A','earnings')">Earnings sample</button>
+              <button class="btn btn-sm" onclick="loadCmpSample('A','risk')">Risk sample</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Document B</div>
+            <textarea id="cmpB" placeholder="Paste second financial document..." style="min-height:140px"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-sm" onclick="loadCmpSample('B','risk')">Risk sample</button>
+              <button class="btn btn-sm" onclick="loadCmpSample('B','guidance')">Guidance sample</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom:20px">
+          <button class="btn btn-primary" onclick="runCompare()">Compare Documents</button>
+        </div>
+        <div class="loading-overlay" id="compareLoading"></div>
+        <div id="compareResults" style="display:none"></div>
+      </div>
+
+      <!-- ── ABOUT ── -->
+      <div class="panel" id="panel-about">
+        <div class="grid-2" style="gap:16px">
+          <div class="card">
+            <div class="card-title">NLP Methods Used</div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">TF-IDF Keyword Extraction</div>
+                <div style="font-size:12px;color:var(--text2)">Term Frequency–Inverse Document Frequency ranks words by importance relative to the corpus. Used to extract key financial terms.</div>
+              </div>
+            </div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">Sentiment Analysis</div>
+                <div style="font-size:12px;color:var(--text2)">TextBlob lexicon-based polarity (-1 to +1) + subjectivity scoring. Cross-validated with domain-specific bullish/bearish word lexicons.</div>
+              </div>
+            </div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">Extractive Summarization</div>
+                <div style="font-size:12px;color:var(--text2)">Sentence scoring via word frequency distribution. Top-N sentences selected and reordered by document position.</div>
+              </div>
+            </div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">Named Entity Recognition</div>
+                <div style="font-size:12px;color:var(--text2)">Regex-based NER for financial entities: money values, company names (legal suffix matching), people (co-reference), dates and periods.</div>
+              </div>
+            </div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">Extractive Q&amp;A</div>
+                <div style="font-size:12px;color:var(--text2)">Token overlap scoring between question and document sentences. Domain-specific routing for financial question types (revenue, risk, people, dates).</div>
+              </div>
+            </div>
+            <div class="kw-item">
+              <div>
+                <div style="font-weight:500;font-size:14px">Risk Signal Classification</div>
+                <div style="font-size:12px;color:var(--text2)">Dictionary-based detection with 3-tier classification (High/Medium/Low). Domain lexicon of 60+ financial risk terms.</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Tech Stack</div>
+            <div class="kw-item"><span>Backend Framework</span><span class="tag tag-green">FastAPI (Python)</span></div>
+            <div class="kw-item"><span>NLP Core</span><span class="tag tag-blue">TextBlob + NLTK</span></div>
+            <div class="kw-item"><span>Feature Extraction</span><span class="tag tag-blue">scikit-learn TF-IDF</span></div>
+            <div class="kw-item"><span>Frontend</span><span class="tag tag-gray">Vanilla HTML/CSS/JS</span></div>
+            <div class="kw-item"><span>API Style</span><span class="tag tag-gray">REST / JSON</span></div>
+            <div class="kw-item"><span>Cost</span><span class="tag tag-green">100% Free</span></div>
+            <div class="kw-item"><span>Internet Required</span><span class="tag tag-green">No (offline)</span></div>
+            <hr class="divider"/>
+            <div class="card-title">API Endpoints</div>
+            <div class="kw-item"><span class="mono" style="font-size:12px">POST /api/analyze</span><span class="tag tag-gray">Full NLP analysis</span></div>
+            <div class="kw-item"><span class="mono" style="font-size:12px">POST /api/qa</span><span class="tag tag-gray">Extractive Q&amp;A</span></div>
+            <div class="kw-item"><span class="mono" style="font-size:12px">POST /api/compare</span><span class="tag tag-gray">Doc comparison</span></div>
+            <div class="kw-item"><span class="mono" style="font-size:12px">GET  /health</span><span class="tag tag-gray">Health check</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<script>
+const API = 'http://localhost:8000';
+
+const SAMPLES = {
+  earnings: `Apple Inc. Reports Fourth Quarter Results\n\nCUPERTINO, California — Apple Inc. today announced financial results for its fiscal 2023 fourth quarter ended September 30, 2023. The Company posted quarterly revenue of $89.5 billion, down 1 percent year over year, and quarterly earnings per diluted share of $1.46, up 13 percent year over year.\n\n"We are happy to report that we had an all-time revenue record in Services and a September quarter record for iPhone despite a challenging macroeconomic environment," said Tim Cook, Apple's CEO. "We now have our strongest lineup of products ever heading into the holiday season."\n\niPhone revenue came in at $43.8 billion, compared to $42.6 billion in the year-ago quarter. Services revenue reached an all-time high of $22.3 billion, compared to $19.2 billion in the year-ago quarter. Apple's board of directors has declared a cash dividend of $0.24 per share. The Company also spent $25 billion on share buybacks during the quarter. Operating cash flow was $21.4 billion.`,
+
+  risk: `Risk Factors — Excerpt from Annual Report\n\nThe following risk factors could materially adversely affect our business, financial condition, and results of operations.\n\nGlobal economic conditions remain uncertain. Inflation, rising interest rates, and potential recession could reduce consumer spending on our products and services. Our gross margins may face significant pressure as component costs increase and we experience supply chain disruptions.\n\nWe face intense competition in all our markets. Competitors may develop products that are superior to ours. Price competition is aggressive, particularly in the smartphone and personal computer segments. We may be unable to maintain our competitive position.\n\nWe are subject to complex legal proceedings. Ongoing antitrust investigations by the European Commission and the US Department of Justice could result in significant fines, penalties, or forced changes to our business model. Cybersecurity threats continue to evolve rapidly. A significant data breach or system failure could damage customer trust and result in regulatory penalties.`,
+
+  guidance: `Forward-Looking Statements and Financial Guidance\n\n"Looking ahead to the December quarter," CFO Luca Maestri said, "we expect our revenue to be similar to the September quarter. We expect Services revenue to grow double digits year over year. We expect gross margin to be between 45.5 percent and 46.5 percent."\n\nManagement remains cautiously optimistic about the next fiscal year. We anticipate total revenue growth of approximately 5 to 8 percent assuming stable foreign exchange rates. Capital expenditure is projected at $12 billion for infrastructure and manufacturing expansion. We plan to return over $110 billion to shareholders through dividends and buybacks.\n\nHowever, we want to flag several headwinds: continued weakness in China due to geopolitical tensions, slower-than-expected enterprise spending, and the phased rollout of new features which may not meaningfully contribute to revenue until mid-2025.`
+};
+
+// ── API Status ──────────────────────────────────────────────────────────────
+
+async function checkApi() {
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      document.getElementById('statusDot').className = 'status-dot online';
+      document.getElementById('statusText').textContent = 'API connected';
+    } else { throw new Error(); }
+  } catch {
+    document.getElementById('statusDot').className = 'status-dot offline';
+    document.getElementById('statusText').textContent = 'API offline';
+  }
+}
+checkApi();
+setInterval(checkApi, 10000);
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+
+const PAGE_META = {
+  home:    ['Dashboard', 'Welcome to FinAnalyst NLP Platform'],
+  analyze: ['Document Analyzer', 'Sentiment · Keywords · Risk Signals · NER · Summary'],
+  qa:      ['Q&A Chat', 'Ask plain-English questions about any financial document'],
+  compare: ['Compare Documents', 'Side-by-side NLP analysis of two documents'],
+  about:   ['About & NLP Methods', 'How FinAnalyst works under the hood']
+};
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  const [title, sub] = PAGE_META[id];
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageSub').textContent = sub;
+}
+
+// ── Samples ─────────────────────────────────────────────────────────────────
+
+function loadSample(key) { document.getElementById('docInput').value = SAMPLES[key]; }
+function clearAll() {
+  document.getElementById('docInput').value = '';
+  document.getElementById('resultsArea').style.display = 'none';
+  document.getElementById('quickStatsArea').innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">◈</div>Paste a document and click Analyze</div></div>`;
+}
+function loadQaSample(key) { document.getElementById('qaDocInput').value = SAMPLES[key]; }
+function loadCmpSample(doc, key) { document.getElementById('cmp' + doc).value = SAMPLES[key]; }
+
+// ── Analyzer ────────────────────────────────────────────────────────────────
+
+async function runAnalysis() {
+  const text = document.getElementById('docInput').value.trim();
+  if (!text) return alert('Please paste a document first.');
+
+  document.getElementById('analyzeLoading').classList.add('show');
+  document.getElementById('resultsArea').style.display = 'none';
+
+  try {
+    const res = await fetch(API + '/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const d = await res.json();
+    renderAnalysis(d, text);
+  } catch(e) {
+    alert('Error: ' + e.message + '\n\nMake sure backend is running on port 8000.');
+  } finally {
+    document.getElementById('analyzeLoading').classList.remove('show');
+  }
+}
+
+function sentimentColor(p) {
+  if (p > 0.2) return 'var(--green)';
+  if (p < -0.2) return 'var(--red)';
+  return 'var(--amber)';
+}
+
+function renderAnalysis(d, text) {
+  // Quick stats sidebar
+  const sColor = sentimentColor(d.sentiment.polarity);
+  document.getElementById('quickStatsArea').innerHTML = `
+    <div class="card">
+      <div class="card-title">Document Overview</div>
+      <div class="kw-item"><span>Type</span><span class="tag tag-blue">${d.document_type}</span></div>
+      <div class="kw-item"><span>Sentiment</span><span class="tag tag-gray" style="color:${sColor}">${d.sentiment.label}</span></div>
+      <div class="kw-item"><span>Polarity</span><span style="font-weight:500;color:${sColor}">${d.sentiment.polarity >= 0 ? '+' : ''}${d.sentiment.polarity}</span></div>
+      <div class="kw-item"><span>Subjectivity</span><span style="font-weight:500">${Math.round(d.sentiment.subjectivity * 100)}%</span></div>
+      <div class="kw-item"><span>Words</span><span style="font-weight:500">${d.readability.word_count}</span></div>
+      <div class="kw-item"><span>Sentences</span><span style="font-weight:500">${d.readability.sentence_count}</span></div>
+      <div class="kw-item"><span>Readability</span><span class="tag tag-gray">${d.readability.readability}</span></div>
+      <div class="kw-item"><span>Bullish signals</span><span style="font-weight:500;color:var(--green)">${d.sentiment.bullish_signals}</span></div>
+      <div class="kw-item"><span>Bearish signals</span><span style="font-weight:500;color:var(--red)">${d.sentiment.bearish_signals}</span></div>
+    </div>`;
+
+  // Metrics row
+  const pol = d.sentiment.polarity;
+  document.getElementById('metricsRow').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Credibility score</div>
+      <div class="metric-value" style="color:${pol>0?'var(--green)':pol<-0.2?'var(--red)':'var(--amber)'}">
+        ${Math.round(50 + pol * 50)}/100
+      </div>
+      <div class="metric-sub">${d.sentiment.label}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Sentiment polarity</div>
+      <div class="metric-value" style="color:${sentimentColor(pol)}">${pol >= 0 ? '+' : ''}${pol}</div>
+      <div class="metric-sub">${pol > 0 ? 'Positive tone' : pol < 0 ? 'Negative tone' : 'Neutral'}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Subjectivity</div>
+      <div class="metric-value">${Math.round(d.sentiment.subjectivity * 100)}%</div>
+      <div class="metric-sub">${d.sentiment.subjectivity > 0.5 ? 'Opinion-heavy' : 'Factual'}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Risk signals</div>
+      <div class="metric-value" style="color:${d.risk_signals.filter(r=>r.level==='high').length>2?'var(--red)':'var(--amber)'}">
+        ${d.risk_signals.length}
+      </div>
+      <div class="metric-sub">${d.risk_signals.filter(r=>r.level==='high').length} high-severity</div>
+    </div>`;
+
+  // Summary
+  document.getElementById('summaryBox').textContent = d.summary;
+
+  // Signal bars
+  const subj = d.sentiment.subjectivity;
+  const bullR = d.sentiment.bullish_signals / Math.max(d.sentiment.bullish_signals + d.sentiment.bearish_signals, 1);
+  const highRisks = d.risk_signals.filter(r => r.level === 'high').length;
+  const riskDens = Math.min(highRisks / 5, 1);
+  const kwDens = Math.min(d.keywords.length / 12, 1);
+  document.getElementById('signalBars').innerHTML = [
+    { label: 'Subjectivity', val: subj, hi: true },
+    { label: 'Bullish language ratio', val: bullR, hi: false },
+    { label: 'High-risk signal density', val: riskDens, hi: true },
+    { label: 'Keyword richness', val: kwDens, hi: false }
+  ].map(b => {
+    const pct = Math.round(b.val * 100);
+    const fill = b.hi
+      ? (b.val > 0.6 ? '#d44' : b.val > 0.3 ? '#c8820a' : '#3a9e5f')
+      : (b.val > 0.6 ? '#3a9e5f' : b.val > 0.3 ? '#c8820a' : '#d44');
+    return `<div class="bar-row">
+      <div class="bar-meta"><span class="bar-label">${b.label}</span><span class="bar-pct">${pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${fill}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Keywords
+  const maxScore = d.keywords[0]?.score || 1;
+  document.getElementById('keywordsArea').innerHTML = d.keywords.slice(0, 10).map(k => {
+    const w = Math.round((k.score / maxScore) * 80);
+    return `<div class="kw-item">
+      <span style="font-size:13px">${k.word}</span>
+      <span><span class="kw-bar" style="width:${w}px"></span><span style="font-size:11px;color:var(--text3);margin-left:6px">${k.score.toFixed(4)}</span></span>
+    </div>`;
+  }).join('');
+
+  // Entities
+  const ent = d.entities;
+  const entHtml = [
+    ...(ent.companies || []).map(e => `<span class="tag tag-blue">${e}</span>`),
+    ...(ent.people || []).map(e => `<span class="tag tag-purple">${e}</span>`),
+    ...(ent.money || []).map(e => `<span class="tag tag-green">${e}</span>`),
+    ...(ent.percentages || []).map(e => `<span class="tag tag-amber">${e}</span>`),
+    ...(ent.dates || []).map(e => `<span class="tag tag-gray">${e}</span>`)
+  ].join('');
+  document.getElementById('entitiesArea').innerHTML = `
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">
+      <span class="tag tag-blue" style="font-size:10px">Company</span>
+      <span class="tag tag-purple" style="font-size:10px;margin:0 4px">Person</span>
+      <span class="tag tag-green" style="font-size:10px;margin-right:4px">Money</span>
+      <span class="tag tag-amber" style="font-size:10px;margin-right:4px">%</span>
+      <span class="tag tag-gray" style="font-size:10px">Date</span>
+    </div>
+    <div class="tags-row">${entHtml || '<span style="color:var(--text3);font-size:13px">No entities detected</span>'}</div>`;
+
+  // Risks
+  document.getElementById('riskArea').innerHTML = d.risk_signals.length === 0
+    ? '<div style="color:var(--text3);font-size:13px">No significant risk signals detected.</div>'
+    : d.risk_signals.slice(0, 8).map(r => {
+        const cls = r.level === 'high' ? 'tag-red' : r.level === 'medium' ? 'tag-amber' : 'tag-green';
+        return `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <span class="tag ${cls}" style="white-space:nowrap;flex-shrink:0">${r.level}</span>
+          <span style="font-size:13px;color:var(--text2)">"${r.phrase}" — <em style="font-size:12px;color:var(--text3)">${r.context}</em></span>
+        </div>`;
+      }).join('');
+
+  // Sentence sentiments
+  document.getElementById('sentencesArea').innerHTML = d.sentence_sentiments.map(s =>
+    `<div class="sentence-item ${s.sentiment}">
+      ${s.sentence}
+      <span style="font-size:11px;color:var(--text3);margin-left:6px">[${s.sentiment}, ${s.score >= 0 ? '+' : ''}${s.score}]</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('resultsArea').style.display = 'block';
+}
+
+// ── Q&A Chat ────────────────────────────────────────────────────────────────
+
+let qaDoc = '';
+let chatHistory = [];
+
+function confirmQaDoc() {
+  const t = document.getElementById('qaDocInput').value.trim();
+  if (!t) return;
+  qaDoc = t;
+  chatHistory = [];
+  document.getElementById('qaDocStatus').textContent = `Document loaded — ${t.split(/\s+/).length} words`;
+  document.getElementById('chatMessages').innerHTML = `
+    <div class="msg assistant">
+      <div class="msg-from">FinAnalyst</div>
+      <div class="msg-body">Document loaded. Ask me anything about it — revenue figures, risks, key people, sentiment, guidance, or any specific detail.</div>
+    </div>`;
+  renderSuggestedQs();
+}
+
+const SUGGESTED = [
+  'What is the total revenue?',
+  'What are the main risk factors?',
+  'Who are the key executives mentioned?',
+  'What is the financial guidance?',
+  'What is the overall sentiment?',
+  'Summarize the key highlights'
+];
+
+function renderSuggestedQs() {
+  document.getElementById('suggestedQs').innerHTML = SUGGESTED.map(q =>
+    `<button class="sq-btn" onclick="fillAndSend('${q.replace(/'/g,"\\'")}')">` + q + `</button>`
+  ).join('');
+}
+
+function fillAndSend(q) {
+  document.getElementById('qaInput').value = q;
+  sendQuestion();
+}
+
+async function sendQuestion() {
+  if (!qaDoc) { alert('Please load a document first.'); return; }
+  const q = document.getElementById('qaInput').value.trim();
+  if (!q) return;
+  document.getElementById('qaInput').value = '';
+  document.getElementById('qaBtn').disabled = true;
+
+  const chat = document.getElementById('chatMessages');
+  chat.innerHTML += `<div class="msg user"><div class="msg-from">You</div><div class="msg-body">${q}</div></div>`;
+
+  const loadEl = document.createElement('div');
+  loadEl.className = 'msg assistant';
+  loadEl.innerHTML = `<div class="msg-from">FinAnalyst</div><div class="msg-body"><span class="spinner"></span> Searching document...</div>`;
+  chat.appendChild(loadEl);
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const res = await fetch(API + '/api/qa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ document: qaDoc, question: q, history: chatHistory })
+    });
+    const d = await res.json();
+    const conf = d.confidence === 'high' ? '●' : '◐';
+    loadEl.querySelector('.msg-body').innerHTML =
+      d.answer +
+      `<br><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">${conf} ${d.confidence} confidence · answer tone: ${d.answer_sentiment}</span>`;
+    chatHistory.push({ role: 'user', content: q });
+    chatHistory.push({ role: 'assistant', content: d.answer });
+  } catch(e) {
+    loadEl.querySelector('.msg-body').textContent = 'Error: ' + e.message;
+  }
+  document.getElementById('qaBtn').disabled = false;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ── Compare ──────────────────────────────────────────────────────────────────
+
+async function runCompare() {
+  const a = document.getElementById('cmpA').value.trim();
+  const b = document.getElementById('cmpB').value.trim();
+  if (!a || !b) return alert('Please paste both documents.');
+
+  document.getElementById('compareLoading').innerHTML = '<span class="spinner"></span> Comparing documents...';
+  document.getElementById('compareLoading').classList.add('show');
+  document.getElementById('compareResults').style.display = 'none';
+
+  try {
+    const res = await fetch(API + '/api/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts: [a, b] })
+    });
+    const d = await res.json();
+    renderCompare(d.comparison);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.getElementById('compareLoading').classList.remove('show');
+  }
+}
+
+function renderCompare(docs) {
+  const labels = ['Document A', 'Document B'];
+  const cards = docs.map((d, i) => {
+    const p = d.sentiment.polarity;
+    const pColor = sentimentColor(p);
+    const kws = d.top_keywords.map(k => `<span class="tag tag-gray" style="font-size:11px">${k.word}</span>`).join(' ');
+    return `<div class="card">
+      <div class="card-title">${labels[i]}</div>
+      <div class="kw-item"><span>Type</span><span class="tag tag-blue" style="font-size:11px">${d.type}</span></div>
+      <div class="kw-item"><span>Sentiment</span><span style="font-weight:500;color:${pColor}">${d.sentiment.label} (${p >= 0 ? '+' : ''}${p})</span></div>
+      <div class="kw-item"><span>Subjectivity</span><span style="font-weight:500">${Math.round(d.sentiment.subjectivity * 100)}%</span></div>
+      <div class="kw-item"><span>Word count</span><span style="font-weight:500">${d.word_count}</span></div>
+      <div class="kw-item"><span>Readability</span><span class="tag tag-gray" style="font-size:11px">${d.readability}</span></div>
+      <div class="kw-item"><span>Bullish / Bearish</span><span style="font-weight:500"><span style="color:var(--green)">${d.sentiment.bullish_signals}↑</span> / <span style="color:var(--red)">${d.sentiment.bearish_signals}↓</span></span></div>
+      <div style="margin-top:12px"><div style="font-size:12px;color:var(--text3);margin-bottom:6px">Top keywords</div><div class="tags-row">${kws}</div></div>
+    </div>`;
+  });
+
+  const winner = docs[0].sentiment.polarity > docs[1].sentiment.polarity
+    ? 'Document A is more bullish/positive in tone.'
+    : docs[1].sentiment.polarity > docs[0].sentiment.polarity
+    ? 'Document B is more bullish/positive in tone.'
+    : 'Both documents have similar sentiment.';
+
+  document.getElementById('compareResults').innerHTML = `
+    <div class="alert alert-info" style="margin-bottom:16px">${winner}</div>
+    <div class="grid-2" style="gap:16px">${cards.join('')}</div>`;
+  document.getElementById('compareResults').style.display = 'block';
+}
+</script>
+</body>
+</html>
